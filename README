@@ -1,5 +1,7 @@
 This a the cutout utility for the BHP.
 
-Provide it a textfile of paths to the images called 'image_paths.txt'
+Provide it a textfile of paths to the images called 'image_paths.txt'-move calc_image_paths.py to the folder with images and run it can create that.
 
 You can select the images from the bottom.  Click the top left then bottom right of the word you want to cut out.  After you click the top left, you can press escape to cancel.  After clicking a dialog box with a picture of the cut out word will appear.  Click cancel, or press okay or enter without entering text to cancel.  Otherwise, enter the word in the textbox, then press okay or press enter.  It will save the image in images/word/(nth_word)_(ith form_in_folder)_(coordinates of word).png.
+
+The current version annotates bounding boxes as well.  To do this, first cutout the field, then enter the first word proceeded by a '!'-for example '!NIL'.  This creates a bounding box annotation form, the information for the word bounding boxes is entered when the words are cutout.
