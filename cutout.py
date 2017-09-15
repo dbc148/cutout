@@ -12,7 +12,12 @@ def PILimageToQImage(pilimage):
     return qimage
 
 
-
+def point_inside_box(b1_tl, b1_br, point):
+    if point[0] < b1_tl[0] or point[0] > b1_br[0]:
+        return False
+    if point[1] < b1_tl[1] or point[1] > b1_br[1]:
+        return False 
+    return True
 
 class placeholder:
     def __init__(self):
@@ -109,6 +114,9 @@ class Popup(QWidget):
         self.offset_x = 0
         self.offset_y = 0
 
+        self.offset_x2 = 0
+        self.offset_y2 = 0
+
         self.image = None
         self.is_shown = False
     def open_with_image(self, image, tr, bl, current_image_id):
@@ -125,7 +133,6 @@ class Popup(QWidget):
         self.layout.addWidget(self.textbox)
         self.layout.addWidget(self.buttons)
         self.is_shown = True
-
         self.show()
 
     def close(self):
@@ -135,11 +142,21 @@ class Popup(QWidget):
         self.hide()
     def save(self):
         text = str(self.textbox.text())
+
+
+        if ((self.offset_x == 0 and self.offset_y == 0 and self.offset_x2 == 0 and self.offset_y2 == 0) or not point_inside_box([self.offset_x, self.offset_y],  [self.offset_x2, self.offset_y2], self.bl) or not point_inside_box([self.offset_x, self.offset_y],  [self.offset_x2, self.offset_y2], self.tr)) and text[0] != '!':
+            w = QWidget()
+            QMessageBox.critical(w, "Error", "Selection outside of previous field, but new field not generated-select a new field and prepend the name with '!'")
+            w.show()
+            self.close()
+            return 0
+
         if text == '':
             self.close()
             return 0
 
         words[text] += 1
+
         if text[0] == '!':
             if self.current_file:
                 self.current_file.close()
@@ -147,15 +164,18 @@ class Popup(QWidget):
             self.offset_x = self.tr[0]
             self.offset_y = self.tr[1]
 
+            self.offset_x2 = self.bl[0]
+            self.offset_y2 = self.bl[1]
+
             save_image('fields/' + text[1:], str(words[text]) + '_' + self.current_image_id + '_' 
                 + str(self.tr[0]) + '_' + str(self.tr[1]) + '_' + str(self.bl[0]) + '_' + str(self.bl[1]), self.image)
+            save_message = 'saved image at: ' + 'fields/' + text + '/' +  str(words[text]) + '_' + image_names[int(self.current_image_id)] + '_' + str(self.tr[0]) + '_' + str(self.tr[1]) + '_' + str(self.bl[0]) + '_' + str(self.bl[1])
+
         else:
             save_image('words/' + text, str(words[text]) + '_' + self.current_image_id + '_' 
                 + str(self.tr[0]) + '_' + str(self.tr[1]) + '_' + str(self.bl[0]) + '_' + str(self.bl[1]), self.image)
             self.current_file.write(text + '\t' + str(self.tr[0]-self.offset_x) + '\t' + str(self.tr[1] - self.offset_y) + '\t' + str(self.bl[0]-self.offset_x) + '\t' + str(self.bl[1]-self.offset_y) + '\n')
-
-
-        save_message = 'saved image at: ' + 'words/' + text + '/' +  str(words[text]) + '_' + image_names[int(self.current_image_id)] + '_' + str(self.tr[0]) + '_' + str(self.tr[1]) + '_' + str(self.bl[0]) + '_' + str(self.bl[1])
+            save_message = 'saved image at: ' + 'words/' + text + '/' +  str(words[text]) + '_' + image_names[int(self.current_image_id)] + '_' + str(self.tr[0]) + '_' + str(self.tr[1]) + '_' + str(self.bl[0]) + '_' + str(self.bl[1])
 
         print save_message
 
